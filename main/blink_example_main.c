@@ -20,6 +20,7 @@ struct rgb_state
     uint8_t r;
     uint8_t g;
     uint8_t b;
+    int debounce;
 };
 
 static const char *TAG = "example";
@@ -40,9 +41,9 @@ static uint8_t selectedPins[select_size];
 
 static void init_specific_led(uint8_t pin_index)
 {
-    rgb_states[pin_index].r = esp_random() % 100;
-    rgb_states[pin_index].g = esp_random() % 100;
-    rgb_states[pin_index].b = esp_random() % 100;
+    rgb_states[pin_index].r = esp_random() % 150;
+    rgb_states[pin_index].g = esp_random() % 150;
+    rgb_states[pin_index].b = esp_random() % 150;
 }
 
 static bool pin_already_selected(uint8_t selected_pin)
@@ -81,26 +82,35 @@ static void blink_led(void)
     for (i = 0; i < select_size; i++)
     {
         struct rgb_state *curr_state = &rgb_states[selectedPins[i]];
+
         led_strip_set_pixel(led_strip, selectedPins[i], curr_state->r, curr_state->g, curr_state->b);
 
-        if (curr_state->r > 0)
+        // start updating just after some debounce time
+        if (curr_state->debounce > 0)
         {
-            curr_state->r = curr_state->r - 1;
+            curr_state->debounce = curr_state->debounce - 1;
         }
-
-        if (curr_state->g > 0)
+        else
         {
-            curr_state->g = curr_state->g - 1;
-        }
+            if (curr_state->r > 0)
+            {
+                curr_state->r = curr_state->r - 1;
+            }
 
-        if (curr_state->b > 0)
-        {
-            curr_state->b = curr_state->b - 1;
-        }
+            if (curr_state->g > 0)
+            {
+                curr_state->g = curr_state->g - 1;
+            }
 
-        if (curr_state->r == 0 && curr_state->g == 0 && curr_state->b == 0)
-        {
-            pick_new_led(i);
+            if (curr_state->b > 0)
+            {
+                curr_state->b = curr_state->b - 1;
+            }
+
+            if (curr_state->r == 0 && curr_state->g == 0 && curr_state->b == 0)
+            {
+                pick_new_led(i);
+            }
         }
     }
 
@@ -172,9 +182,12 @@ static void init_led_states(void)
         selectedPins[i] = selected_number;
     }
 
+    int debounce = 0;
     for (int i = 0; i < select_size; i++)
     {
         init_specific_led(selectedPins[i]);
+        rgb_states[selectedPins[i]].debounce = debounce;
+        debounce += 30;
     }
 }
 
