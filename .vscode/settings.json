@@ -1,0 +1,16 @@
+{
+  "C_Cpp.intelliSenseEngine": "default",
+"idf.adapterTargetName": "esp32c3",
+"idf.openOcdConfigs": [
+    "board/esp32c3-builtin.cfg"
+],
+"idf.portWin": "COM5",
+"idf.flashType": "UART",
+"files.associations": {
+    "sdkconfig.h": "c",
+    "random": "c",
+    "esp_system.h": "c",
+    "esp_idf_version.h": "c",
+    "esp_bit_defs.h": "c"
+}
+}
